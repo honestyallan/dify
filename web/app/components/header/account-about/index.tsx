@@ -42,7 +42,7 @@ export default function AccountAbout({
           )} />
           <div className='mb-3 text-center text-xs font-normal text-gray-500'>Version {langeniusVersionInfo?.current_version}</div>
           <div className='mb-4 text-center text-xs font-normal text-gray-700'>
-            <div>© 2023 LangGenius, Inc., Contributors.</div>
+            <div>© 2023 Xinchain, Inc., Contributors.</div>
             <div className='text-[#1C64F2]'>
               {
                 IS_CE_EDITION
@@ -53,36 +53,6 @@ export default function AccountAbout({
                   </>
               }
             </div>
-          </div>
-        </div>
-        <div className='mb-4 h-0 border-[0.5px] border-gray-200' />
-        <div className='flex justify-between items-center'>
-          <div className='text-xs font-medium text-gray-800'>
-            {
-              isLatest
-                ? t('common.about.latestAvailable', { version: langeniusVersionInfo.latest_version })
-                : t('common.about.nowAvailable', { version: langeniusVersionInfo.latest_version })
-            }
-          </div>
-          <div className='flex items-center'>
-            <Link
-              className={classNames(buttonClassName, 'mr-2')}
-              href={'https://github.com/langgenius/dify/releases'}
-              target='_blank'
-            >
-              {t('common.about.changeLog')}
-            </Link>
-            {
-              !isLatest && !IS_CE_EDITION && (
-                <Link
-                  className={classNames(buttonClassName, 'text-primary-600')}
-                  href={langeniusVersionInfo.release_notes}
-                  target='_blank'
-                >
-                  {t('common.about.updateNow')}
-                </Link>
-              )
-            }
           </div>
         </div>
       </div>
