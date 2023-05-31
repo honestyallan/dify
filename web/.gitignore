@@ -47,3 +47,8 @@ yarn.lock
 
 # pmpm
 pnpm-lock.yaml
+
+node_modules
+.next
+.github
+.husky
