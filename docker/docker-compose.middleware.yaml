@@ -3,7 +3,7 @@ services:
 
   # API service
   api:
-    image: langgenius/dify-api:0.3.0
+    image: langgenius/dify-api:latest
     restart: always
     environment:
       # Startup mode, 'api' starts the API server.
@@ -111,7 +111,7 @@ services:
       - "5001:5001"
   # The postgres database.
   db:
-    image: postgres:15-alpine
+    image: postgres:16beta1-bullseye
     restart: always
     environment:
       # The password for the default postgres user.
@@ -127,7 +127,7 @@ services:
 
   # The redis cache.
   redis:
-    image: redis:6-alpine
+    image: redis:latest
     restart: always
     volumes:
       # Mount the redis data directory to the container.
