@@ -111,7 +111,7 @@ services:
       - "5001:5001"
   # The postgres database.
   db:
-    image: postgres:16beta1-bullseye
+    image: postgres:15-alpine
     restart: always
     environment:
       # The password for the default postgres user.
