@@ -124,7 +124,7 @@ services:
       LOG_LEVEL: INFO
       # A secret key that is used for securely signing the session cookie and encrypting sensitive information on the database. You can generate a strong key using `openssl rand -base64 42`.
       # same as the API service
-      SECRET_KEY: sJ0Sg6F2PRSw8XPP44yYLgHp/QZ+iXW2ef6ejDbysaqEvKww9MBc32UH
+      SECRET_KEY: sk-9f73s3ljTXVcMT3Blb3ljTqtsKiGHXVcMT3BlbkFJLK7U
       # The configurations of postgres database connection.
       # It is consistent with the configuration in the 'db' service below.
       DB_USERNAME: postgres
@@ -170,12 +170,14 @@ services:
       # console or api domain.
       # example: http://udify.app
       APP_URL: ''
+      # The DSN for Sentry error reporting. If not set, Sentry error reporting will be disabled.
+      SENTRY_DSN: ''
     ports:
       - "3000:3000"
 
   # The postgres database.
   db:
-    image: postgres:16beta1-bullseye
+    image: postgres:15-alpine
     restart: always
     environment:
       # The password for the default postgres user.
