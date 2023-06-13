@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { useContext } from 'use-context-selector'
 import produce from 'immer'
 import { useBoolean, useGetState } from 'ahooks'
+import axios from 'axios'
 import AppUnavailable from '../../base/app-unavailable'
 import useConversation from './hooks/use-conversation'
 import s from './style.module.css'
@@ -54,6 +55,7 @@ const Main: FC<IMainProps> = ({
   const [isShowSidebar, { setTrue: showSidebar, setFalse: hideSidebar }] = useBoolean(false)
   // Can Use metadata(https://beta.nextjs.org/docs/api-reference/metadata) to set title. But it only works in server side client.
   useEffect(() => {
+    search()
     if (siteInfo?.title) {
       if (plan !== 'basic')
         document.title = `${siteInfo.title}`
@@ -62,6 +64,25 @@ const Main: FC<IMainProps> = ({
     }
   }, [siteInfo?.title, plan])
 
+  async function search() {
+    const urlParams = new URLSearchParams(window.location.search)
+    const smp = urlParams.get('smp')
+    if (smp) {
+      localStorage.setItem('smp', smp)
+      try {
+        const response = await axios.get(`http://127.0.0.1:8085/nom/user/smpMappingToken?smp=${smp}`)
+        console.log(response)
+        if (response.data.data)
+          localStorage.setItem('ioToken', response.data.data)
+      }
+      catch (error: any) {
+        console.error(error)
+      }
+      urlParams.delete('smp')
+      const newUrl = `${window.location.origin}${window.location.pathname}${urlParams.toString() ? `?${urlParams}` : ''}`
+      window.history.replaceState(null, '', newUrl)
+    }
+  }
   /*
   * conversation info
   */

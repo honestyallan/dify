@@ -1,9 +1,10 @@
 import type { FC } from 'react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   PlayIcon,
 } from '@heroicons/react/24/solid'
+import axios from 'axios'
 import Select from '@/app/components/base/select'
 import type { SiteInfo } from '@/models/share'
 import type { PromptConfig } from '@/models/debug'
@@ -19,6 +20,9 @@ export type IConfigSenceProps = {
   onQueryChange: (query: string) => void
   onSend: () => void
 }
+
+let isCheckToken = true
+
 const ConfigSence: FC<IConfigSenceProps> = ({
   promptConfig,
   inputs,
@@ -28,6 +32,46 @@ const ConfigSence: FC<IConfigSenceProps> = ({
   onSend,
 }) => {
   const { t } = useTranslation()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleClick = async () => {
+    const ioToken = localStorage.getItem('ioToken')
+    if (ioToken) {
+      const valid = await checkToken(ioToken)
+      console.log(valid)
+      if (valid)
+        return
+    }
+    let url = window.location.href
+    const index = url.indexOf('?')
+    if (index !== -1)
+      url = url.substring(0, index)
+    window.location.href = `http://localhost:1002/#/login?redirect=${url}`
+  }
+
+  async function checkToken(ioToken: string) {
+    try {
+      const response = await axios.get('http://127.0.0.1:8085/nom/user/checkToken', {
+        headers: {
+          Authorization: `${ioToken}`,
+        },
+      })
+      console.log(response)
+      if (response.status === 200 && response.data.code === 200)
+        return true
+      return false
+    }
+    catch (error: any) {
+      console.error(error)
+      return false
+    }
+  }
+
+  useEffect(() => {
+    if (query?.length > 0 && isCheckToken) {
+      handleClick()
+      isCheckToken = false
+    }
+  }, [handleClick, query])
 
   return (
     <div className="">

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import cn from 'classnames'
 import { useBoolean, useClickAway } from 'ahooks'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import axios from 'axios'
 import TabHeader from '../../base/tab-header'
 import Button from '../../base/button'
 import s from './style.module.css'
@@ -199,9 +200,30 @@ const TextGeneration: FC<IMainProps> = ({
 
   // Can Use metadata(https://beta.nextjs.org/docs/api-reference/metadata) to set title. But it only works in server side client.
   useEffect(() => {
+    search()
     if (siteInfo?.title)
       document.title = `${siteInfo.title} - Powered by Xinchain`
   }, [siteInfo?.title])
+
+  async function search() {
+    const urlParams = new URLSearchParams(window.location.search)
+    const smp = urlParams.get('smp')
+    if (smp) {
+      localStorage.setItem('smp', smp)
+      try {
+        const response = await axios.get(`http://127.0.0.1:8085/nom/user/smpMappingToken?smp=${smp}`)
+        console.log(response)
+        if (response.data.data)
+          localStorage.setItem('ioToken', response.data.data)
+      }
+      catch (error: any) {
+        console.error(error)
+      }
+      urlParams.delete('smp')
+      const newUrl = `${window.location.origin}${window.location.pathname}${urlParams.toString() ? `?${urlParams}` : ''}`
+      window.history.replaceState(null, '', newUrl)
+    }
+  }
 
   const [isShowResSidebar, { setTrue: showResSidebar, setFalse: hideResSidebar }] = useBoolean(false)
   const resRef = useRef<HTMLDivElement>(null)

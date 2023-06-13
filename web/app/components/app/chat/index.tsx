@@ -6,6 +6,7 @@ import cn from 'classnames'
 import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/react/24/outline'
 import { UserCircleIcon } from '@heroicons/react/24/solid'
 import { useTranslation } from 'react-i18next'
+import axios from 'axios'
 import { randomString } from '../../app-sidebar/basic'
 import s from './style.module.css'
 import LoadingAnim from './loading-anim'
@@ -401,6 +402,8 @@ const Question: FC<IQuestionProps> = ({ id, content, more, useCurrentUserAvatar 
   )
 }
 
+let isCheckToken = true
+
 const Chat: FC<IChatProps> = ({
   chatList,
   feedbackDisabled = false,
@@ -442,9 +445,50 @@ const Chat: FC<IChatProps> = ({
     return true
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleClick = async () => {
+    const ioToken = localStorage.getItem('ioToken')
+    if (ioToken) {
+      const valid = await checkToken(ioToken)
+      console.log(valid)
+      if (valid)
+        return
+    }
+    let url = window.location.href
+    const index = url.indexOf('?')
+    if (index !== -1)
+      url = url.substring(0, index)
+    window.location.href = `http://localhost:1002/#/login?redirect=${url}`
+  }
+
+  async function checkToken(ioToken: string) {
+    try {
+      const response = await axios.get('http://127.0.0.1:8085/nom/user/checkToken', {
+        headers: {
+          Authorization: `${ioToken}`,
+        },
+      })
+      console.log(response)
+      if (response.status === 200 && response.data.code === 200)
+        return true
+      return false
+    }
+    catch (error: any) {
+      console.error(error)
+      return false
+    }
+  }
+
+  useEffect(() => {
+    if (query.trim().length > 0 && isCheckToken) {
+      handleClick()
+      isCheckToken = false
+    }
+  }, [handleClick, query])
+
   useEffect(() => {
     if (controlClearQuery)
-      setQuery('')
+      setQuery('dwdadawdwaw')
   }, [controlClearQuery])
 
   const handleSend = () => {
