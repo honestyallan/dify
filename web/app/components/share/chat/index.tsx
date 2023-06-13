@@ -70,7 +70,7 @@ const Main: FC<IMainProps> = ({
     if (smp) {
       localStorage.setItem('smp', smp)
       try {
-        const response = await axios.get(`http://127.0.0.1:8085/nom/user/smpMappingToken?smp=${smp}`)
+        const response = await axios.get(`https://api.xinchain.io/api/nom/user/smpMappingToken?smp=${smp}`)
         console.log(response)
         if (response.data.data)
           localStorage.setItem('ioToken', response.data.data)

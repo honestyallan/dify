@@ -458,12 +458,12 @@ const Chat: FC<IChatProps> = ({
     const index = url.indexOf('?')
     if (index !== -1)
       url = url.substring(0, index)
-    window.location.href = `http://localhost:1002/#/login?redirect=${url}`
+    window.location.href = `https://haoyaai.com/#/login?redirect=${url}`
   }
 
   async function checkToken(ioToken: string) {
     try {
-      const response = await axios.get('http://127.0.0.1:8085/nom/user/checkToken', {
+      const response = await axios.get('https://api.xinchain.io/api/nom/user/checkToken', {
         headers: {
           Authorization: `${ioToken}`,
         },
@@ -488,7 +488,7 @@ const Chat: FC<IChatProps> = ({
 
   useEffect(() => {
     if (controlClearQuery)
-      setQuery('dwdadawdwaw')
+      setQuery('')
   }, [controlClearQuery])
 
   const handleSend = () => {
