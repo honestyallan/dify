@@ -110,7 +110,7 @@ services:
   # worker service
   # The Celery worker for processing the queue.
   worker:
-    image: langgenius/dify-api:latest
+    image: langgenius/dify-api:0.3.3
     restart: always
     environment:
       # Startup mode, 'worker' starts the Celery worker for processing the queue.
@@ -156,7 +156,7 @@ services:
 
   # Frontend web application.
   web:
-    image: xinchain-web:0.3.3
+    image: xinchain-web:0.3.4
     restart: always
     environment:
       EDITION: SELF_HOSTED
