@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 import os
+from datetime import datetime
+
 if not os.environ.get("DEBUG") or os.environ.get("DEBUG").lower() != 'true':
     from gevent import monkey
     monkey.patch_all()
@@ -18,7 +20,7 @@ from extensions.ext_database import db
 from extensions.ext_login import login_manager
 
 # DO NOT REMOVE BELOW
-from models import model, account, dataset, web, task
+from models import model, account, dataset, web, task, source
 from events import event_handlers
 # DO NOT REMOVE ABOVE
 
@@ -121,6 +123,9 @@ def load_user(user_id):
                 if tenant_account_join:
                     account.current_tenant_id = tenant_account_join.tenant_id
                     session['workspace_id'] = account.current_tenant_id
+
+            account.last_active_at = datetime.utcnow()
+            db.session.commit()
 
             # Log in the user with the updated user_id
             flask_login.login_user(account, remember=True)

@@ -172,8 +172,6 @@ services:
       APP_URL: ''
       # The DSN for Sentry error reporting. If not set, Sentry error reporting will be disabled.
       SENTRY_DSN: ''
-    ports:
-      - "3000:3000"
 
   # The postgres database.
   db:
