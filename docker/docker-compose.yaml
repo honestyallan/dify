@@ -158,7 +158,7 @@ services:
 
   # Frontend web application.
   web:
-    image: xinchain-web:0.3.2
+    image: xinchain-web:0.3.3
     restart: always
     environment:
       EDITION: SELF_HOSTED
