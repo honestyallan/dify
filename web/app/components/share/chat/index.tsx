@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 'use client'
 import type { FC } from 'react'
@@ -78,6 +79,10 @@ const Main: FC<IMainProps> = ({
       catch (error: any) {
         console.error(error)
       }
+      const url = new URL(document.referrer)
+      const hostname = url.hostname
+      if (hostname)
+        localStorage.setItem('mStation', `https://${hostname}`)
       urlParams.delete('smp')
       const newUrl = `${window.location.origin}${window.location.pathname}${urlParams.toString() ? `?${urlParams}` : ''}`
       window.history.replaceState(null, '', newUrl)
