@@ -8,6 +8,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import axios from 'axios'
 import TabHeader from '../../base/tab-header'
 import Button from '../../base/button'
+import ShowRechargeModal from '../../app/overview/show-recharge'
 import s from './style.module.css'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import ConfigScence from '@/app/components/share/text-generation/config-scence'
@@ -54,6 +55,7 @@ const TextGeneration: FC<IMainProps> = ({
   const [completionRes, setCompletionRes] = useState('')
   const { notify } = Toast
   const isNoData = !completionRes
+  const [showRecharge, setShowRecharge] = useState(false)
 
   const [messageId, setMessageId] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<Feedbacktype>({
@@ -117,6 +119,53 @@ const TextGeneration: FC<IMainProps> = ({
     return !hasEmptyInput
   }
 
+  async function loginTo() {
+    let url = window.location.href
+    const index = url.indexOf('?')
+    if (index !== -1)
+      url = url.substring(0, index)
+    window.location.href = `https://haoyaai.com/#/login?redirect=${url}`
+  }
+
+  async function checkUseLimit() {
+    try {
+      const ioToken = localStorage.getItem('ioToken')
+      if (!ioToken) {
+        loginTo()
+        return
+      }
+      const response = await axios.get('https://api.xinchain.io/api/nom/user/checkUseLimit', {
+        headers: {
+          Authorization: ioToken,
+        },
+      })
+      if (response.status === 200 && response.data.code === 200) {
+        if (!response.data.data) {
+          // 充值会员
+          setShowRecharge(true)
+        }
+        return response.data.data
+      }
+      return false
+    }
+    catch (error: any) {
+      return false
+    }
+  }
+
+  async function exploreCut() {
+    try {
+      axios.get('https://api.xinchain.io/api/nom/user/exploreCut', {
+        headers: {
+          Authorization: localStorage.getItem('ioToken'),
+        },
+      })
+    }
+    catch (error: any) {
+      return false
+    }
+  }
+
   const handleSend = async () => {
     if (isResponsing) {
       notify({ type: 'info', message: t('appDebug.errorMessage.waitForResponse') })
@@ -130,6 +179,11 @@ const TextGeneration: FC<IMainProps> = ({
       logError(t('appDebug.errorMessage.queryRequired'))
       return false
     }
+
+    // 验证能否使用
+    const isCanUse = await checkUseLimit()
+    if (!isCanUse)
+      return
 
     const data = {
       inputs,
@@ -164,6 +218,8 @@ const TextGeneration: FC<IMainProps> = ({
         setResponsingFalse()
       },
     }, isInstalledApp, installedAppInfo?.id)
+    // 扣减次数
+    exploreCut()
   }
 
   const fetchInitData = () => {
@@ -219,6 +275,10 @@ const TextGeneration: FC<IMainProps> = ({
       catch (error: any) {
         console.error(error)
       }
+      const url = new URL(document.referrer)
+      const hostname = url.hostname
+      if (hostname)
+        localStorage.setItem('mStation', `https://${hostname}`)
       urlParams.delete('smp')
       const newUrl = `${window.location.origin}${window.location.pathname}${urlParams.toString() ? `?${urlParams}` : ''}`
       window.history.replaceState(null, '', newUrl)
@@ -407,6 +467,14 @@ const TextGeneration: FC<IMainProps> = ({
             {renderRes}
           </div>
         )}
+        {
+          <div>
+            <ShowRechargeModal
+              isShow={showRecharge}
+              onClose={() => setShowRecharge(false)}
+            />
+          </div>
+        }
       </div>
     </>
   )

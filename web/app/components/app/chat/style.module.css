@@ -118,3 +118,11 @@
 .textArea:focus+div .sendBtn {
   background-image: url(./icons/send-active.svg);
 }
+
+.logo {
+  width: 134px;
+  height: 40px;
+  background: url(~@/app/components/share/chat/welcome/icons/logo.png) center center no-repeat;
+  background-size: contain;
+  margin: 0 auto;
+}

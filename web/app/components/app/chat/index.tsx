@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 'use client'
 import type { FC } from 'react'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -8,6 +9,7 @@ import { UserCircleIcon } from '@heroicons/react/24/solid'
 import { useTranslation } from 'react-i18next'
 import axios from 'axios'
 import { randomString } from '../../app-sidebar/basic'
+import ShowRechargeModal from '../overview/show-recharge'
 import s from './style.module.css'
 import LoadingAnim from './loading-anim'
 import CopyBtn from './copy-btn'
@@ -428,6 +430,8 @@ const Chat: FC<IChatProps> = ({
   const { t } = useTranslation()
   const { notify } = useContext(ToastContext)
   const isUseInputMethod = useRef(false)
+  const [showRecharge, setShowRecharge] = useState(false)
+  const [isInvite, setInvite] = useState(false)
 
   const [query, setQuery] = React.useState('')
   const handleContentChange = (e: any) => {
@@ -456,6 +460,10 @@ const Chat: FC<IChatProps> = ({
       if (valid)
         return
     }
+    loginTo()
+  }
+
+  async function loginTo() {
     let url = window.location.href
     const index = url.indexOf('?')
     if (index !== -1)
@@ -481,6 +489,54 @@ const Chat: FC<IChatProps> = ({
     }
   }
 
+  async function checkUseLimit() {
+    try {
+      const ioToken = localStorage.getItem('ioToken')
+      if (!ioToken) {
+        loginTo()
+        return
+      }
+      const response = await axios.get('https://api.xinchain.io/api/nom/user/checkUseLimit', {
+        headers: {
+          Authorization: ioToken,
+        },
+      })
+      if (response.status === 200 && response.data.code === 200) {
+        if (!response.data.data) {
+          // 充值会员
+          setShowRecharge(true)
+          // 限制使用提醒
+          setInvite(true)
+        }
+        return response.data.data
+      }
+      return false
+    }
+    catch (error: any) {
+      return false
+    }
+  }
+
+  async function exploreCut() {
+    try {
+      axios.get('https://api.xinchain.io/api/nom/user/exploreCut', {
+        headers: {
+          Authorization: localStorage.getItem('ioToken'),
+        },
+      })
+    }
+    catch (error: any) {
+      return false
+    }
+  }
+
+  async function jumpUserInfo() {
+    let mStation = localStorage.getItem('mStation')
+    if (!mStation)
+      mStation = 'https://haoyaai.com'
+    window.open(`${mStation}/#/userInfo`, '_blank')
+  }
+
   useEffect(() => {
     if (query.trim().length > 0 && isCheckToken) {
       handleClick()
@@ -493,12 +549,20 @@ const Chat: FC<IChatProps> = ({
       setQuery('')
   }, [controlClearQuery])
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!valid() || (checkCanSend && !checkCanSend()))
       return
+    // 验证能否使用
+    const isCanUse = await checkUseLimit()
+    if (!isCanUse)
+      return
+    if (isInvite)
+      setInvite(false)
     onSend(query)
     if (!isResponsing)
       setQuery('')
+    // 扣减次数
+    exploreCut()
   }
 
   const handleKeyUp = (e: any) => {
@@ -596,6 +660,11 @@ const Chat: FC<IChatProps> = ({
                   </div>
                 </div>)
             }
+            {isInvite && (
+              <div className="flex justify-center items-center py-2" style={{ opacity: 0.7, fontSize: 12 }}>
+                <p>今日體驗次數已用完，可 <a onClick={jumpUserInfo} style={{ color: 'blue' }}>充值會員</a> 或 <a onClick={jumpUserInfo} style={{ color: 'blue' }}>邀請好友</a> 獲得更多次數</p>
+              </div>
+            )}
             <div className="relative">
               <AutoHeightTextarea
                 value={query}
@@ -629,7 +698,14 @@ const Chat: FC<IChatProps> = ({
           </div>
         )
       }
-
+      {
+        <div>
+          <ShowRechargeModal
+            isShow={showRecharge}
+            onClose={() => setShowRecharge(false)}
+          />
+        </div>
+      }
     </div>
   )
 }
