@@ -81,8 +81,8 @@ class NotionLoader(BaseLoader):
         docs = []
         if notion_page_type == 'database':
             # get all the pages in the database
-            page_text = self._get_notion_database_data(notion_obj_id)
-            docs.append(Document(page_content=page_text))
+            page_text_documents = self._get_notion_database_data(notion_obj_id)
+            docs.extend(page_text_documents)
         elif notion_page_type == 'page':
             page_text_list = self._get_notion_block_data(notion_obj_id)
             for page_text in page_text_list:
@@ -94,7 +94,7 @@ class NotionLoader(BaseLoader):
 
     def _get_notion_database_data(
             self, database_id: str, query_dict: Dict[str, Any] = {}
-    ) -> str:
+    ) -> List[Document]:
         """Get all the pages from a Notion database."""
         res = requests.post(
             DATABASE_URL_TMPL.format(database_id=database_id),
@@ -110,7 +110,7 @@ class NotionLoader(BaseLoader):
 
         database_content_list = []
         if 'results' not in data or data["results"] is None:
-            return ""
+            return []
         for result in data["results"]:
             properties = result['properties']
             data = {}
@@ -134,9 +134,19 @@ class NotionLoader(BaseLoader):
                 else:
                     value = property_value[type]
                 data[property_name] = value
-            database_content_list.append(json.dumps(data, ensure_ascii=False))
+            row_dict = {k: v for k, v in data.items() if v}
+            row_content = ''
+            for key, value in row_dict.items():
+                if isinstance(value, dict):
+                    value_dict = {k: v for k, v in value.items() if v}
+                    value_content = ''.join(f'{k}:{v} ' for k, v in value_dict.items())
+                    row_content = row_content + f'{key}:{value_content}\n'
+                else:
+                    row_content = row_content + f'{key}:{value}\n'
+            document = Document(page_content=row_content)
+            database_content_list.append(document)
 
-        return "\n\n".join(database_content_list)
+        return database_content_list
 
     def _get_notion_block_data(self, page_id: str) -> List[str]:
         result_lines_arr = []
