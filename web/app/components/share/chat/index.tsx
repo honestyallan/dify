@@ -9,13 +9,26 @@ import produce from 'immer'
 import { useBoolean, useGetState } from 'ahooks'
 import axios from 'axios'
 import AppUnavailable from '../../base/app-unavailable'
+import { checkOrSetAccessToken } from '../utils'
 import useConversation from './hooks/use-conversation'
 import s from './style.module.css'
 import { ToastContext } from '@/app/components/base/toast'
 import Sidebar from '@/app/components/share/chat/sidebar'
 import ConfigSence from '@/app/components/share/chat/config-scence'
 import Header from '@/app/components/share/header'
-import { delConversation, fetchAppInfo, fetchAppParams, fetchChatList, fetchConversations, fetchSuggestedQuestions, pinConversation, sendChatMessage, stopChatMessageResponding, unpinConversation, updateFeedback } from '@/service/share'
+import {
+  delConversation,
+  fetchAppInfo,
+  fetchAppParams,
+  fetchChatList,
+  fetchConversations,
+  fetchSuggestedQuestions,
+  pinConversation,
+  sendChatMessage,
+  stopChatMessageResponding,
+  unpinConversation,
+  updateFeedback,
+} from '@/service/share'
 import type { ConversationItem, SiteInfo } from '@/models/share'
 import type { PromptConfig, SuggestedQuestionsAfterAnswerConfig } from '@/models/debug'
 import type { Feedbacktype, IChatItem } from '@/app/components/app/chat'
@@ -174,6 +187,7 @@ const Main: FC<IMainProps> = ({
   }
 
   const [suggestedQuestionsAfterAnswerConfig, setSuggestedQuestionsAfterAnswerConfig] = useState<SuggestedQuestionsAfterAnswerConfig | null>(null)
+  const [speechToTextConfig, setSpeechToTextConfig] = useState<SuggestedQuestionsAfterAnswerConfig | null>(null)
 
   const [conversationIdChangeBecauseOfNew, setConversationIdChangeBecauseOfNew, getConversationIdChangeBecauseOfNew] = useGetState(false)
   const [isChatStarted, { setTrue: setChatStarted, setFalse: setChatNotStarted }] = useBoolean(false)
@@ -320,7 +334,10 @@ const Main: FC<IMainProps> = ({
     return fetchConversations(isInstalledApp, installedAppInfo?.id, undefined, undefined, 100)
   }
 
-  const fetchInitData = () => {
+  const fetchInitData = async () => {
+    if (!isInstalledApp)
+      await checkOrSetAccessToken()
+
     return Promise.all([isInstalledApp
       ? {
         app_id: installedAppInfo?.id,
@@ -351,7 +368,7 @@ const Main: FC<IMainProps> = ({
         const isNotNewConversation = allConversations.some(item => item.id === _conversationId)
         setAllConversationList(allConversations)
         // fetch new conversation info
-        const { user_input_form, opening_statement: introduction, suggested_questions_after_answer }: any = appParams
+        const { user_input_form, opening_statement: introduction, suggested_questions_after_answer, speech_to_text }: any = appParams
         const prompt_variables = userInputsFormToPromptVariables(user_input_form)
         if (siteInfo.default_language)
           changeLanguage(siteInfo.default_language)
@@ -366,6 +383,7 @@ const Main: FC<IMainProps> = ({
           prompt_variables,
         } as PromptConfig)
         setSuggestedQuestionsAfterAnswerConfig(suggested_questions_after_answer)
+        setSpeechToTextConfig(speech_to_text)
 
         // setConversationList(conversations as ConversationItem[])
 
@@ -394,6 +412,9 @@ const Main: FC<IMainProps> = ({
   }
 
   const checkCanSend = () => {
+    if (currConversationId !== '-1')
+      return true
+
     const prompt_variables = promptConfig?.prompt_variables
     const inputs = currInputs
     if (!inputs || !prompt_variables || prompt_variables?.length === 0)
@@ -642,6 +663,7 @@ const Main: FC<IMainProps> = ({
                     controlFocus={controlFocus}
                     isShowSuggestion={doShowSuggestion}
                     suggestionList={suggestQuestions}
+                    isShowSpeechToText={speechToTextConfig?.enabled}
                   />
                 </div>
               </div>)
