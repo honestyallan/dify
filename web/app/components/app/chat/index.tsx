@@ -466,7 +466,7 @@ const Chat: FC<IChatProps> = ({
       if (valid)
         return
     }
-    loginTo()
+    await loginTo()
   }
 
   async function loginTo() {
@@ -485,9 +485,7 @@ const Chat: FC<IChatProps> = ({
         },
       })
       console.log(response)
-      if (response.status === 200 && response.data.code === 200)
-        return true
-      return false
+      return response.status === 200 && response.data.code === 200;
     }
     catch (error: any) {
       console.error(error)
@@ -499,7 +497,7 @@ const Chat: FC<IChatProps> = ({
     try {
       const ioToken = localStorage.getItem('ioToken')
       if (!ioToken) {
-        loginTo()
+        await loginTo()
         return
       }
       const response = await axios.get('https://api.xinchain.io/api/nom/user/checkUseLimit', {
@@ -525,7 +523,7 @@ const Chat: FC<IChatProps> = ({
 
   async function exploreCut() {
     try {
-      axios.get('https://api.xinchain.io/api/nom/user/exploreCut', {
+      await axios.get('https://api.xinchain.io/api/nom/user/exploreCut', {
         headers: {
           Authorization: localStorage.getItem('ioToken'),
         },
@@ -568,7 +566,7 @@ const Chat: FC<IChatProps> = ({
     if (!isResponsing)
       setQuery('')
     // 扣减次数
-    exploreCut()
+    await exploreCut()
   }
 
   const handleKeyUp = (e: any) => {
