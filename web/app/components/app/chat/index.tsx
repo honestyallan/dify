@@ -553,11 +553,11 @@ const Chat: FC<IChatProps> = ({
       setQuery('')
   }, [controlClearQuery])
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!valid() || (checkCanSend && !checkCanSend()))
       return
     // 验证能否使用
-    const isCanUse = await checkUseLimit()
+    const isCanUse = checkUseLimit()
     if (!isCanUse)
       return
     if (isInvite)
@@ -566,7 +566,7 @@ const Chat: FC<IChatProps> = ({
     if (!isResponsing)
       setQuery('')
     // 扣减次数
-    await exploreCut()
+    exploreCut()
   }
 
   const handleKeyUp = (e: any) => {
