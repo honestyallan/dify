@@ -72,7 +72,7 @@ const TextGeneration: FC<IMainProps> = ({
   const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null)
   const [promptConfig, setPromptConfig] = useState<PromptConfig | null>(null)
   const [moreLikeThisConfig, setMoreLikeThisConfig] = useState<MoreLikeThisConfig | null>(null)
-
+  const [showRecharge, setShowRecharge] = useState(false)
   // save message
   const [savedMessages, setSavedMessages] = useState<SavedMessage[]>([])
   const fetchSavedMessage = async () => {
@@ -93,6 +93,53 @@ const TextGeneration: FC<IMainProps> = ({
   // send message task
   const [controlSend, setControlSend] = useState(0)
   const [controlStopResponding, setControlStopResponding] = useState(0)
+
+  async function loginTo() {
+    let url = window.location.href
+    const index = url.indexOf('?')
+    if (index !== -1)
+      url = url.substring(0, index)
+    window.location.href = `https://haoyaai.com/#/login?redirect=${url}`
+  }
+
+  async function checkUseLimit() {
+    try {
+      const ioToken = localStorage.getItem('ioToken')
+      if (!ioToken) {
+        loginTo()
+        return
+      }
+      const response = await axios.get('https://api.xinchain.io/api/nom/user/checkUseLimit', {
+        headers: {
+          Authorization: ioToken,
+        },
+      })
+      if (response.status === 200 && response.data.code === 200) {
+        if (!response.data.data) {
+          // 充值会员
+          setShowRecharge(true)
+        }
+        return response.data.data
+      }
+      return false
+    }
+    catch (error: any) {
+      return false
+    }
+  }
+
+  async function exploreCut() {
+    try {
+      axios.get('https://api.xinchain.io/api/nom/user/exploreCut', {
+        headers: {
+          Authorization: localStorage.getItem('ioToken'),
+        },
+      })
+    }
+    catch (error: any) {
+      return false
+    }
+  }
   const handleSend = () => {
     setIsCallBatchAPI(false)
     setControlSend(Date.now())
@@ -171,53 +218,6 @@ const TextGeneration: FC<IMainProps> = ({
 
       if (hasMiddleEmptyLine) {
         notify({ type: 'error', message: t('share.generation.errorMsg.emptyLine', { rowIndex: startIndex + 2 }) })
-        return false
-      }
-    }
-
-    async function loginTo() {
-      let url = window.location.href
-      const index = url.indexOf('?')
-      if (index !== -1)
-        url = url.substring(0, index)
-      window.location.href = `https://haoyaai.com/#/login?redirect=${url}`
-    }
-
-    async function checkUseLimit() {
-      try {
-        const ioToken = localStorage.getItem('ioToken')
-        if (!ioToken) {
-          loginTo()
-          return
-        }
-        const response = await axios.get('https://api.xinchain.io/api/nom/user/checkUseLimit', {
-          headers: {
-            Authorization: ioToken,
-          },
-        })
-        if (response.status === 200 && response.data.code === 200) {
-          if (!response.data.data) {
-            // 充值会员
-            setShowRecharge(true)
-          }
-          return response.data.data
-        }
-        return false
-      }
-      catch (error: any) {
-        return false
-      }
-    }
-
-    async function exploreCut() {
-      try {
-        axios.get('https://api.xinchain.io/api/nom/user/exploreCut', {
-          headers: {
-            Authorization: localStorage.getItem('ioToken'),
-          },
-        })
-      }
-      catch (error: any) {
         return false
       }
     }
