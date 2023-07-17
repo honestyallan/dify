@@ -2,11 +2,9 @@
 import { useTranslation } from 'react-i18next'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames'
-import Link from 'next/link'
 import s from './index.module.css'
 import Modal from '@/app/components/base/modal'
 import type { LangGeniusVersionResponse } from '@/models/common'
-import { IS_CE_EDITION } from '@/config'
 
 type IAccountSettingProps = {
   langeniusVersionInfo: LangGeniusVersionResponse
@@ -34,7 +32,7 @@ export default function AccountAbout({
         <div>
           <div className={classNames(
             s['logo-icon'],
-            'mx-auto mb-3 w-12 h-12 bg-white rounded border border-gray-200',
+            'mx-auto mb-3 w-12 h-12 bg-white rounded-xl border border-gray-200',
           )} />
           <div className={classNames(
             s['logo-text'],
@@ -43,16 +41,16 @@ export default function AccountAbout({
           <div className='mb-3 text-center text-xs font-normal text-gray-500'>Version {langeniusVersionInfo?.current_version}</div>
           <div className='mb-4 text-center text-xs font-normal text-gray-700'>
             <div>© 2023 Xinchain, Contributors.</div>
-            {/*<div className='text-[#1C64F2]'>*/}
-            {/*  {*/}
-            {/*    IS_CE_EDITION*/}
-            {/*      ? <Link href={'https://github.com/langgenius/dify/blob/main/LICENSE'} target='_blank'>Open Source License</Link>*/}
-            {/*      : <>*/}
-            {/*        <Link href={'https://haoyaai.com/#/privacy'} target='_blank'>Privacy Policy</Link>,*/}
-            {/*        <Link href={'https://haoyaai.com/#/term'} target='_blank'>Terms of Service</Link>*/}
-            {/*      </>*/}
-            {/*  }*/}
-            {/*</div>*/}
+            {/* <div className='text-[#1C64F2]'> */}
+            {/*  { */}
+            {/*    IS_CE_EDITION */}
+            {/*      ? <Link href={'https://github.com/langgenius/dify/blob/main/LICENSE'} target='_blank'>Open Source License</Link> */}
+            {/*      : <> */}
+            {/*        <Link href={'https://haoyaai.com/#/privacy'} target='_blank'>Privacy Policy</Link>, */}
+            {/*        <Link href={'https://haoyaai.com/#/term'} target='_blank'>Terms of Service</Link> */}
+            {/*      </> */}
+            {/*  } */}
+            {/* </div> */}
           </div>
         </div>
       </div>
